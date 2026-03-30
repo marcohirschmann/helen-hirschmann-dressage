@@ -731,6 +731,24 @@ function kiesBetaling(btn) {
 function klantGewijzigd() {
     const v = document.getElementById('klant-keuze').value;
     document.getElementById('adhoc-blok').style.display = v === '_adhoc' ? 'block' : 'none';
+
+    // Adres automatisch invullen in Naar veld
+    if (v && v !== '_adhoc') {
+        const klant = app.klanten.find(k => k.id === v);
+        if (klant && klant.adres) {
+            // Klant heeft adres — vul het in en verberg handmatig veld
+            document.getElementById('naar-keuze').value = klant.adres;
+            document.getElementById('naar').value = klant.adres;
+            document.getElementById('naar-handmatig-blok').style.display = 'none';
+        } else {
+            // Klant heeft geen adres — toon handmatig invoer
+            document.getElementById('naar-keuze').value = '_handmatig';
+            document.getElementById('naar').value = '';
+            document.getElementById('naar-handmatig-blok').style.display = 'block';
+            document.getElementById('naar').focus();
+            toast('⚠️ Geen adres bekend voor deze klant — vul het hieronder in');
+        }
+    }
 }
 
 function doelGewijzigd() {
