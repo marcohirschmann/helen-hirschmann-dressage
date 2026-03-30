@@ -190,6 +190,21 @@
         /* Sectie divider */
         .sectie-titel { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px 2px; }
 
+        /* Login scherm */
+        .login-overlay { position: fixed; inset: 0; background: linear-gradient(160deg, #1a1a1a 0%, #2a2a2a 100%); z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 30px; }
+        .login-overlay.verborgen { display: none; }
+        .login-logo { text-align: center; margin-bottom: 32px; }
+        .login-logo .login-bedrijf { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 26px; font-weight: 700; color: white; letter-spacing: 1.5px; }
+        .login-logo .login-sub { font-family: 'Cormorant Garamond', Georgia, serif; font-size: 13px; color: #c9a96e; letter-spacing: 3px; text-transform: uppercase; font-style: italic; margin-top: 4px; }
+        .login-streep { width: 60px; height: 2px; background: linear-gradient(90deg, transparent, #c9a96e, transparent); margin: 16px auto; }
+        .login-box { background: white; border-radius: 16px; padding: 28px 24px; width: 100%; max-width: 340px; box-shadow: 0 20px 60px rgba(0,0,0,0.5); }
+        .login-box label { font-size: 12px; font-weight: 700; color: #666; text-transform: uppercase; letter-spacing: 0.5px; display: block; margin-bottom: 8px; }
+        .login-box input { width: 100%; padding: 13px 16px; border: 1.5px solid #dde2ea; border-radius: 10px; font-size: 17px; outline: none; letter-spacing: 2px; box-sizing: border-box; }
+        .login-box input:focus { border-color: #1a3f6f; box-shadow: 0 0 0 3px rgba(26,63,111,0.1); }
+        .login-fout { color: #c62828; font-size: 13px; text-align: center; margin-top: 10px; min-height: 18px; font-weight: 600; }
+        .login-box .btn-login { width: 100%; margin-top: 16px; padding: 14px; background: #1a3f6f; color: white; border: none; border-radius: 10px; font-size: 16px; font-weight: 700; cursor: pointer; touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+        .login-box .btn-login:active { opacity: 0.85; }
+
         /* Print / PDF */
         @media print {
             header .kenteken { border: 2px solid #555; }
@@ -246,6 +261,22 @@
     </div>
     <div class="header-streep"></div>
 </header>
+
+<!-- LOGIN SCHERM -->
+<div class="login-overlay" id="login-overlay">
+    <div class="login-logo">
+        <div class="login-bedrijf">Helen Hirschmann Dressage</div>
+        <div class="login-streep"></div>
+        <div class="login-sub">Ritten Registratie</div>
+    </div>
+    <div class="login-box">
+        <label for="login-ww">Wachtwoord</label>
+        <input type="password" id="login-ww" placeholder="••••••••" autocomplete="current-password"
+               onkeydown="if(event.key==='Enter') controleerLogin()" />
+        <div class="login-fout" id="login-fout"></div>
+        <button type="button" class="btn-login" onclick="controleerLogin()">Inloggen</button>
+    </div>
+</div>
 
 <div class="backup-banner" id="backup-banner">
     <span>💾 Je hebt <strong id="backup-teller">10</strong> ritten opgeslagen zonder backup!</span>
@@ -424,6 +455,18 @@
             <label>Adres (wordt automatisch ingevuld bij nieuwe rit)</label>
             <input type="text" id="inst-van" placeholder="bv. Thuisstraat 1, 1234 AB Stad" />
             <button class="btn btn-secondary btn-block" onclick="slaStandaardVanOp()">Opslaan</button>
+        </div>
+
+        <div class="card" style="border:1.5px solid #555;">
+            <p class="sectie-titel">🔒 Wachtwoord wijzigen</p>
+            <label>Huidig wachtwoord</label>
+            <input type="password" id="ww-oud" placeholder="••••••••" autocomplete="current-password" />
+            <label>Nieuw wachtwoord</label>
+            <input type="password" id="ww-nieuw1" placeholder="••••••••" autocomplete="new-password" />
+            <label>Herhaal nieuw wachtwoord</label>
+            <input type="password" id="ww-nieuw2" placeholder="••••••••" autocomplete="new-password" />
+            <div id="ww-fout" style="color:#c62828;font-size:13px;margin-top:6px;min-height:16px;font-weight:600;"></div>
+            <button class="btn btn-primary btn-block" onclick="wijzigWachtwoord()">Wachtwoord wijzigen</button>
         </div>
 
         <div class="card" style="border:1.5px solid #1a3f6f;">
@@ -1138,8 +1181,69 @@ function toast(bericht) {
 }
 
 // ══════════════════════════════════════════
+// LOGIN & BEVEILIGING
+// ══════════════════════════════════════════
+const STANDAARD_HASH = 'cd13fd5b656d58cbede87a73197a68783559c519ee3e1bba1a0f87ce1a9a169e';
+
+async function sha256(tekst) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(tekst));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+}
+
+function opgeslagenHash() {
+    return localStorage.getItem('hhd_ww_hash') || STANDAARD_HASH;
+}
+
+async function controleerLogin() {
+    const ww = document.getElementById('login-ww').value;
+    if (!ww) { document.getElementById('login-fout').textContent = 'Vul een wachtwoord in'; return; }
+    const hash = await sha256(ww);
+    if (hash === opgeslagenHash()) {
+        localStorage.setItem('hhd_ingelogd', Date.now());
+        document.getElementById('login-overlay').classList.add('verborgen');
+        document.getElementById('login-fout').textContent = '';
+        document.getElementById('login-ww').value = '';
+    } else {
+        document.getElementById('login-fout').textContent = '❌ Onjuist wachtwoord';
+        document.getElementById('login-ww').value = '';
+        document.getElementById('login-ww').focus();
+    }
+}
+
+async function wijzigWachtwoord() {
+    const oud = document.getElementById('ww-oud').value;
+    const nieuw1 = document.getElementById('ww-nieuw1').value;
+    const nieuw2 = document.getElementById('ww-nieuw2').value;
+    const foutEl = document.getElementById('ww-fout');
+
+    if (!oud || !nieuw1 || !nieuw2) { foutEl.textContent = 'Vul alle velden in'; return; }
+    if (nieuw1 !== nieuw2) { foutEl.textContent = 'Nieuwe wachtwoorden komen niet overeen'; return; }
+    if (nieuw1.length < 6) { foutEl.textContent = 'Wachtwoord moet minimaal 6 tekens zijn'; return; }
+
+    const oudHash = await sha256(oud);
+    if (oudHash !== opgeslagenHash()) { foutEl.textContent = '❌ Huidig wachtwoord onjuist'; return; }
+
+    const nieuwHash = await sha256(nieuw1);
+    localStorage.setItem('hhd_ww_hash', nieuwHash);
+    document.getElementById('ww-oud').value = '';
+    document.getElementById('ww-nieuw1').value = '';
+    document.getElementById('ww-nieuw2').value = '';
+    foutEl.textContent = '';
+    toast('✅ Wachtwoord gewijzigd');
+}
+
+function checkLogin() {
+    const ingelogd = localStorage.getItem('hhd_ingelogd');
+    const GELDIG_MS = 30 * 24 * 60 * 60 * 1000; // 30 dagen
+    if (ingelogd && (Date.now() - parseInt(ingelogd)) < GELDIG_MS) {
+        document.getElementById('login-overlay').classList.add('verborgen');
+    }
+}
+
+// ══════════════════════════════════════════
 // START
 // ══════════════════════════════════════════
+checkLogin();
 init();
 </script>
 </body>
