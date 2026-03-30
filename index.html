@@ -181,6 +181,12 @@
         .toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #222; color: white; padding: 11px 22px; border-radius: 30px; font-size: 14px; font-weight: 500; opacity: 0; pointer-events: none; z-index: 9999; transition: opacity 0.3s; white-space: nowrap; }
         .toast.zichtbaar { opacity: 1; }
 
+        /* Backup banner */
+        .backup-banner { display: none; background: linear-gradient(135deg, #e65100, #f57c00); color: white; padding: 12px 16px; text-align: center; font-size: 13px; font-weight: 600; position: relative; }
+        .backup-banner.zichtbaar { display: flex; align-items: center; justify-content: center; gap: 10px; flex-wrap: wrap; }
+        .backup-banner button { background: white; color: #e65100; border: none; border-radius: 20px; padding: 6px 14px; font-size: 12px; font-weight: 700; cursor: pointer; -webkit-tap-highlight-color: transparent; touch-action: manipulation; }
+        .backup-banner .sluiten { background: none; color: rgba(255,255,255,0.7); font-size: 18px; padding: 0 4px; }
+
         /* Sectie divider */
         .sectie-titel { font-size: 12px; font-weight: 700; color: #888; text-transform: uppercase; letter-spacing: 0.5px; margin: 0 0 10px 2px; }
 
@@ -240,6 +246,12 @@
     </div>
     <div class="header-streep"></div>
 </header>
+
+<div class="backup-banner" id="backup-banner">
+    <span>💾 Je hebt <strong id="backup-teller">10</strong> ritten opgeslagen zonder backup!</span>
+    <button type="button" onclick="exporteerBackup()">Nu backup maken</button>
+    <button type="button" class="sluiten" onclick="sluitBackupBanner()">✕</button>
+</div>
 
 <div class="tabs">
     <button type="button" class="tab active" data-tab="invoer" onclick="toonTab(this)">➕ Invoer</button>
@@ -469,6 +481,23 @@ function laad() {
 
 function sla() {
     localStorage.setItem('rittenApp_v1', JSON.stringify(app));
+    checkBackupBanner();
+}
+
+function checkBackupBanner() {
+    const rittenBijBackup = parseInt(localStorage.getItem('rittenBijBackup') || '0');
+    const nieuw = app.ritten.length - rittenBijBackup;
+    const banner = document.getElementById('backup-banner');
+    if (nieuw >= 10) {
+        document.getElementById('backup-teller').textContent = nieuw;
+        banner.classList.add('zichtbaar');
+    } else {
+        banner.classList.remove('zichtbaar');
+    }
+}
+
+function sluitBackupBanner() {
+    document.getElementById('backup-banner').classList.remove('zichtbaar');
 }
 
 // ══════════════════════════════════════════
@@ -497,6 +526,7 @@ function init() {
     renderLesTarievenLijst();
     vulFilterOpties();
     renderOverzicht();
+    checkBackupBanner();
 }
 
 // ══════════════════════════════════════════
@@ -999,6 +1029,8 @@ function exporteerBackup() {
     const json = JSON.stringify(backup, null, 2);
     const datum = new Date().toISOString().slice(0, 10);
     downloadBestand(json, `HHD_backup_${datum}.json`, 'application/json');
+    localStorage.setItem('rittenBijBackup', app.ritten.length);
+    checkBackupBanner();
     toast('💾 Backup gedownload');
 }
 
@@ -1027,6 +1059,8 @@ function importeerBackup(input) {
             document.getElementById('inst-prijs').value = app.instellingen.prijsPerKm;
             document.getElementById('inst-van').value = app.instellingen.standaardVan || '';
             zetHuidigeprijs();
+            localStorage.setItem('rittenBijBackup', app.ritten.length);
+            checkBackupBanner();
             toast(`✅ Backup teruggezet — ${app.ritten.length} ritten geladen`);
         } catch(err) {
             toast('⚠️ Ongeldig backup bestand');
