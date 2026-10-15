@@ -1,0 +1,14 @@
+{
+  "name": "knhs-jury-scoring",
+  "version": "1.0.0",
+  "description": "Jury invoer en live tv weergave voor KNHS dressuurwedstrijden",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "license": "UNLICENSED",
+  "private": true
+}

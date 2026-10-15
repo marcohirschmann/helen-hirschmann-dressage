@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Jury invoer</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&family=Lato:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  :root { --navy: #1a3f6f; --goud: #c9a96e; --bg: #f5f3ef; --lijn: #dde2ea; --rood: #c62828; --groen: #2e7d32; }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Lato', -apple-system, sans-serif; background: var(--bg); color: #2c2c2c; font-size: 16px; }
+  header { background: var(--navy); color: #fff; padding: 14px 20px 0; border-bottom: 3px solid var(--goud); }
+  header h1 { font-family: 'Cormorant Garamond', serif; font-size: 26px; font-weight: 700; }
+  header .sub { color: var(--goud); font-size: 13px; letter-spacing: 1px; text-transform: uppercase; }
+  .tabs { display: flex; gap: 4px; margin-top: 12px; overflow-x: auto; }
+  .tabs button { background: none; border: 0; color: #c8d3e3; padding: 10px 16px; font: inherit; font-weight: 700; cursor: pointer; border-radius: 6px 6px 0 0; white-space: nowrap; }
+  .tabs button.on { background: var(--bg); color: var(--navy); }
+  main { max-width: 1200px; margin: 0 auto; padding: 20px 16px 60px; }
+  .paneel { display: none; } .paneel.on { display: block; }
+  .kaart { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.08); padding: 18px; margin-bottom: 16px; }
+  h2 { font-family: 'Cormorant Garamond', serif; color: var(--navy); font-size: 24px; margin-bottom: 12px; }
+  h3 { color: var(--navy); font-size: 16px; margin: 14px 0 8px; }
+  label { display: block; font-size: 13px; font-weight: 700; color: #555; margin-bottom: 4px; }
+  input, select, textarea { font: inherit; padding: 9px 10px; border: 1px solid #c9ced8; border-radius: 6px; background: #fff; width: 100%; }
+  textarea { min-height: 140px; font-family: ui-monospace, Menlo, Consolas, monospace; font-size: 14px; }
+  input:focus, select:focus, textarea:focus { outline: 2px solid var(--goud); border-color: var(--goud); }
+  .rij { display: grid; gap: 12px; grid-template-columns: repeat(auto-fit, minmax(170px, 1fr)); margin-bottom: 12px; }
+  .knop { background: var(--navy); color: #fff; border: 0; border-radius: 6px; padding: 10px 16px; font: inherit; font-weight: 700; cursor: pointer; }
+  .knop.goud { background: var(--goud); color: var(--navy); }
+  .knop.licht { background: #eef1f6; color: var(--navy); }
+  .knop.rood { background: var(--rood); }
+  .knop.groen { background: var(--groen); }
+  .knop:disabled { opacity: 0.5; cursor: default; }
+  .knoppen { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+  table { width: 100%; border-collapse: collapse; }
+  th { text-align: left; font-size: 12px; text-transform: uppercase; color: #777; padding: 8px; border-bottom: 2px solid var(--lijn); }
+  td { padding: 8px; border-bottom: 1px solid var(--lijn); vertical-align: middle; }
+  .r { text-align: right; } .c { text-align: center; }
+  .hint { color: #777; font-size: 13px; margin-top: 6px; line-height: 1.5; }
+  .leeg { color: #888; padding: 20px 0; text-align: center; }
+
+  .scoren { display: grid; grid-template-columns: 300px 1fr; gap: 16px; align-items: start; }
+  @media (max-width: 860px) { .scoren { grid-template-columns: 1fr; } }
+  .lijst { max-height: 70vh; overflow-y: auto; }
+  .ditem { display: flex; gap: 10px; align-items: center; padding: 10px; border-radius: 8px; cursor: pointer; border: 1px solid transparent; }
+  .ditem:hover { background: #f3f5f9; }
+  .ditem.on { border-color: var(--goud); background: #fbf6ec; }
+  .ditem .nr { font-weight: 700; color: var(--navy); width: 38px; text-align: center; background: #eef1f6; border-radius: 6px; padding: 4px 0; }
+  .ditem .naam { flex: 1; line-height: 1.25; }
+  .ditem .naam small { color: #777; }
+  .stip { width: 10px; height: 10px; border-radius: 50%; background: #ccc; flex: none; }
+  .stip.gestart { background: #f9a825; } .stip.klaar { background: var(--groen); } .stip.uitgesloten, .stip.nietGestart { background: var(--rood); }
+  .tvlabel { font-size: 11px; background: var(--goud); color: var(--navy); border-radius: 4px; padding: 2px 6px; font-weight: 700; }
+
+  .kop { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; flex-wrap: wrap; }
+  .kop .ruiter { font-size: 22px; font-weight: 700; color: var(--navy); }
+  .kop .paard { color: #555; }
+  .juryknop { display: flex; gap: 6px; }
+  .juryknop button { border: 1px solid var(--navy); background: #fff; color: var(--navy); border-radius: 6px; padding: 8px 12px; font: inherit; font-weight: 700; cursor: pointer; }
+  .juryknop button.on { background: var(--navy); color: #fff; }
+  .onderdelen td { padding: 6px 8px; }
+  .onderdelen .tekst { line-height: 1.3; }
+  .onderdelen input { width: 76px; text-align: center; font-size: 20px; font-weight: 700; padding: 8px 4px; }
+  .onderdelen input.fout { border-color: var(--rood); background: #fdecea; }
+  .coef { font-size: 12px; background: var(--goud); color: var(--navy); border-radius: 4px; padding: 2px 6px; font-weight: 700; }
+  .snel { display: flex; gap: 3px; flex-wrap: wrap; }
+  .snel button { border: 1px solid var(--lijn); background: #fff; border-radius: 5px; width: 34px; height: 34px; font: inherit; font-size: 14px; cursor: pointer; }
+  .snel button.on { background: var(--navy); color: #fff; border-color: var(--navy); }
+  @media (max-width: 1050px) { .snel { display: none; } }
+  .totaal { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 14px; }
+  .totaal div { background: #f3f5f9; border-radius: 8px; padding: 10px 12px; }
+  .totaal b { display: block; font-size: 24px; color: var(--navy); }
+  .totaal span { font-size: 12px; color: #666; text-transform: uppercase; }
+  .totaal .groot { background: var(--navy); } .totaal .groot b, .totaal .groot span { color: #fff; }
+  .teller { display: flex; align-items: center; gap: 8px; }
+  .teller button { width: 40px; height: 40px; font-size: 20px; border-radius: 6px; border: 1px solid #c9ced8; background: #fff; cursor: pointer; }
+  .teller b { min-width: 24px; text-align: center; font-size: 20px; }
+  .opgeslagen { font-size: 13px; color: var(--groen); }
+  .opgeslagen.bezig { color: #f57c00; } .opgeslagen.fout { color: var(--rood); }
+  .melding { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: #333; color: #fff; padding: 10px 18px; border-radius: 8px; display: none; z-index: 10; }
+  .pin { max-width: 340px; margin: 80px auto; text-align: center; }
+  @media print {
+    header, .knoppen, .noprint { display: none !important; }
+    .paneel { display: none !important; } #p-uitslag { display: block !important; }
+    .kaart { box-shadow: none; page-break-inside: avoid; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="sub" id="hWedstrijd">KNHS dressuur</div>
+  <h1>Jury invoer</h1>
+  <nav class="tabs" id="tabs">
+    <button data-tab="scoren" class="on">Scoren</button>
+    <button data-tab="uitslag">Uitslag</button>
+    <button data-tab="startlijst">Startlijst</button>
+    <button data-tab="proeven">Proeven</button>
+    <button data-tab="instellingen">TV en wedstrijd</button>
+  </nav>
+</header>
+
+<main>
+  <div id="pinScherm" class="kaart pin" style="display:none">
+    <h2>Pincode</h2>
+    <p class="hint">Voer de pincode van de jury in.</p>
+    <input id="pinInvoer" type="password" inputmode="numeric" style="margin:12px 0">
+    <button class="knop" id="pinOk">Inloggen</button>
+  </div>
+
+  <!-- SCOREN -->
+  <section class="paneel on" id="p-scoren">
+    <div class="scoren">
+      <div class="kaart">
+        <label>Proef</label>
+        <select id="sProef"></select>
+        <div class="lijst" id="sLijst" style="margin-top:12px"></div>
+      </div>
+      <div class="kaart" id="sForm"><div class="leeg">Kies een deelnemer</div></div>
+    </div>
+  </section>
+
+  <!-- UITSLAG -->
+  <section class="paneel" id="p-uitslag">
+    <div class="kaart noprint">
+      <div class="knoppen" style="margin-top:0">
+        <button class="knop licht" onclick="window.print()">Afdrukken</button>
+        <button class="knop licht" id="csvExport">Exporteer CSV</button>
+      </div>
+    </div>
+    <div id="uitslagen"></div>
+  </section>
+
+  <!-- STARTLIJST -->
+  <section class="paneel" id="p-startlijst">
+    <div class="kaart">
+      <h2 id="dTitel">Deelnemer toevoegen</h2>
+      <input type="hidden" id="dId">
+      <div class="rij">
+        <div><label>Startnummer</label><input id="dStartnr"></div>
+        <div><label>Ruiter</label><input id="dRuiter"></div>
+        <div><label>Paard</label><input id="dPaard"></div>
+        <div><label>Vereniging</label><input id="dVereniging"></div>
+        <div><label>Proef</label><select id="dProef"></select></div>
+      </div>
+      <div class="knoppen">
+        <button class="knop" id="dOpslaan">Opslaan</button>
+        <button class="knop licht" id="dNieuw">Leegmaken</button>
+      </div>
+    </div>
+    <div class="kaart">
+      <h2>Startlijst</h2>
+      <div id="dLijst"></div>
+    </div>
+    <div class="kaart">
+      <h2>Startlijst plakken</h2>
+      <p class="hint">Plak regels uit Excel of een tekstbestand. Eén deelnemer per regel in de volgorde
+        <b>startnummer; ruiter; paard; vereniging</b>. Tabs en puntkomma's werken allebei.</p>
+      <div class="rij" style="margin-top:10px"><div><label>Voor proef</label><select id="iProef"></select></div></div>
+      <textarea id="iTekst" placeholder="12;Anna de Vries;Bonfire;LR De Ruiters"></textarea>
+      <div class="knoppen"><button class="knop" id="iImport">Importeren</button></div>
+    </div>
+  </section>
+
+  <!-- PROEVEN -->
+  <section class="paneel" id="p-proeven">
+    <div class="kaart">
+      <h2 id="pTitel">Proef toevoegen</h2>
+      <input type="hidden" id="pId">
+      <div class="rij">
+        <div><label>Naam van de proef</label><input id="pNaam" placeholder="Bijvoorbeeld B proef 2"></div>
+        <div><label>Rubriek of klasse</label><input id="pRubriek" placeholder="Bijvoorbeeld B Paarden"></div>
+        <div><label>Aantal juryleden</label><select id="pJury"><option>1</option><option>2</option><option>3</option><option>4</option><option>5</option></select></div>
+        <div><label>Aftrek per fout in parcours</label><input id="pFout" value="2;4"></div>
+      </div>
+      <p class="hint">Aftrek per fout: de punten voor de 1e, 2e fout enzovoort, gescheiden door een puntkomma.
+        Eén fout meer dan in deze lijst betekent uitsluiting. Leeg laten als fouten geen aftrek geven.</p>
+      <h3>Onderdelen</h3>
+      <p class="hint">Eén onderdeel per regel. Zet de coëfficiënt achter een puntkomma als die hoger is dan 1,
+        bijvoorbeeld <b>Stap; 2</b>. Neem ook de algemene punten (zoals gang, impuls, houding en zit) op als onderdelen.
+        Neem de onderdelen over van het officiële KNHS protocol van de proef.</p>
+      <textarea id="pOnderdelen" style="min-height:260px" placeholder="A X Binnenkomen in arbeidsdraf, halthouden, groeten&#10;C Linkerhand&#10;Middenstap; 2&#10;Gangen; 2"></textarea>
+      <div class="hint" id="pTelling"></div>
+      <div class="knoppen">
+        <button class="knop" id="pOpslaan">Opslaan</button>
+        <button class="knop licht" id="pNieuw">Leegmaken</button>
+      </div>
+    </div>
+    <div class="kaart">
+      <h2>Proeven</h2>
+      <div id="pLijst"></div>
+    </div>
+  </section>
+
+  <!-- INSTELLINGEN -->
+  <section class="paneel" id="p-instellingen">
+    <div class="kaart">
+      <h2>Smart tv</h2>
+      <p class="hint">Open op de tv in de browser: <b id="tvUrl"></b></p>
+      <div class="rij" style="margin-top:12px">
+        <div><label>Proef op tv</label><select id="tProef"></select></div>
+        <div><label>Nu in de baan</label><select id="tActief"></select></div>
+        <div><label>Wisselen van pagina (sec)</label><input id="tRotatie" type="number" min="5" max="120"></div>
+        <div><label>Tussenstand tonen</label><select id="tLive"><option value="1">Ja, live meetellen</option><option value="0">Nee, pas na afronden</option></select></div>
+      </div>
+      <div class="knoppen"><button class="knop" id="tOpslaan">Toepassen</button></div>
+    </div>
+    <div class="kaart">
+      <h2>Wedstrijd</h2>
+      <div class="rij">
+        <div><label>Naam</label><input id="wNaam"></div>
+        <div><label>Datum</label><input id="wDatum" type="date"></div>
+        <div><label>Locatie</label><input id="wLocatie"></div>
+      </div>
+      <div class="knoppen"><button class="knop" id="wOpslaan">Opslaan</button></div>
+    </div>
+    <div class="kaart">
+      <h2>Back up</h2>
+      <p class="hint">Alles wordt automatisch op de server opgeslagen. Maak voor de zekerheid ook een back up,
+        of gebruik dit om een voorbereide wedstrijd mee te nemen.</p>
+      <div class="knoppen">
+        <button class="knop licht" id="bExport">Download back up</button>
+        <label class="knop licht" style="margin:0;font-size:16px;color:var(--navy)">Back up terugzetten<input type="file" id="bImport" accept=".json" style="display:none"></label>
+        <button class="knop rood" id="bReset">Alles wissen</button>
+      </div>
+    </div>
+  </section>
+</main>
+<div class="melding" id="melding"></div>
+
+<script src="calc.js"></script>
+<script src="jury.js"></script>
+</body>
+</html>

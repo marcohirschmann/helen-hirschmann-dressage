@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Uitslagen</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; overflow: hidden; }
+  body {
+    background: #0e2240;
+    color: #fff;
+    font-family: 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+    font-size: 1.6vw;
+  }
+  .wrap { height: 100%; display: -webkit-box; display: -webkit-flex; display: flex; -webkit-flex-direction: column; flex-direction: column; padding: 1.6vw 2.2vw; }
+  header { display: -webkit-flex; display: flex; -webkit-align-items: flex-end; align-items: flex-end; border-bottom: 0.25vw solid #c9a96e; padding-bottom: 0.8vw; }
+  header .titel { -webkit-flex: 1; flex: 1; }
+  .wedstrijd { color: #c9a96e; font-size: 1.4vw; letter-spacing: 0.15vw; text-transform: uppercase; }
+  .proef { font-size: 3.2vw; font-weight: 700; line-height: 1.15; }
+  .rubriek { font-size: 1.5vw; color: #b9c6da; }
+  .klok { font-size: 2.6vw; font-weight: 300; color: #dfe6f0; }
+
+  .live {
+    margin-top: 1.2vw; background: #c9a96e; color: #0e2240; border-radius: 0.8vw;
+    display: -webkit-flex; display: flex; -webkit-align-items: center; align-items: center; padding: 1vw 1.6vw;
+  }
+  .live .label { font-size: 1.1vw; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12vw; }
+  .live .nr { font-size: 3.4vw; font-weight: 800; width: 7vw; text-align: center; margin-right: 1.4vw; background: #0e2240; color: #c9a96e; border-radius: 0.6vw; }
+  .live .wie { -webkit-flex: 1; flex: 1; }
+  .live .ruiter { font-size: 2.6vw; font-weight: 700; line-height: 1.1; }
+  .live .paard { font-size: 1.7vw; }
+  .live .score { text-align: right; }
+  .live .perc { font-size: 4vw; font-weight: 800; line-height: 1; }
+  .live .sub { font-size: 1.3vw; font-weight: 600; }
+  .balk { height: 0.5vw; background: rgba(14,34,64,0.25); border-radius: 0.3vw; margin-top: 0.5vw; overflow: hidden; }
+  .balk div { height: 100%; background: #0e2240; }
+
+  .tabel { -webkit-flex: 1; flex: 1; margin-top: 1.2vw; overflow: hidden; }
+  table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+  th { text-align: left; color: #c9a96e; font-size: 1.15vw; text-transform: uppercase; letter-spacing: 0.1vw; font-weight: 600; padding: 0.4vw 0.8vw; }
+  td { padding: 0 0.8vw; height: 4.4vw; font-size: 1.9vw; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; border-top: 0.1vw solid rgba(255,255,255,0.08); }
+  tr.alt td { background: rgba(255,255,255,0.035); }
+  tr.actief td { background: rgba(201,169,110,0.22); }
+  .r { text-align: right; }
+  .c { text-align: center; }
+  .pl { font-weight: 800; color: #c9a96e; font-size: 2.3vw; }
+  .pl1 { color: #ffd700; } .pl2 { color: #dfe3ea; } .pl3 { color: #d9a066; }
+  .vet { font-weight: 700; }
+  .zacht { color: #8fa1bb; }
+  .klein { font-size: 1.4vw; color: #b9c6da; }
+  .badge { font-size: 1.1vw; padding: 0.2vw 0.6vw; border-radius: 0.4vw; background: rgba(255,255,255,0.12); color: #dfe6f0; }
+  footer { display: -webkit-flex; display: flex; -webkit-justify-content: space-between; justify-content: space-between; color: #6f83a3; font-size: 1.1vw; padding-top: 0.6vw; }
+  .leeg { text-align: center; margin-top: 12vw; font-size: 2.4vw; color: #8fa1bb; }
+  .offline { color: #ff8a80; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <div class="titel">
+      <div class="wedstrijd" id="wedstrijd"></div>
+      <div class="proef" id="proef">Verbinden</div>
+      <div class="rubriek" id="rubriek"></div>
+    </div>
+    <div class="klok" id="klok"></div>
+  </header>
+  <div id="live"></div>
+  <div class="tabel" id="tabel"></div>
+  <footer><span id="pagina"></span><span id="status"></span></footer>
+</div>
+<script src="calc.js"></script>
+<script src="tv.js"></script>
+</body>
+</html>
